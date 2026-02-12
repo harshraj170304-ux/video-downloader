@@ -1,0 +1,14 @@
+{
+  "name": "video-downloader",
+  "version": "1.0.0",
+  "description": "Download videos from YouTube up to 4K quality",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

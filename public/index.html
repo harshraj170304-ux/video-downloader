@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Downloader</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f0;
+      min-height: 100vh;
+      color: #1a1a1a;
+      padding: 40px 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    
+    h1 span {
+      color: #7c8c6e;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: #666;
+      font-weight: 400;
+    }
+    
+    .platforms {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    
+    .platform {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #fff;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      border: 1px solid #e5e5e0;
+      transition: all 0.3s ease;
+    }
+    
+    .platform:hover {
+      border-color: #7c8c6e;
+      transform: translateY(-2px);
+    }
+    
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 24px;
+      border: 1px solid #e5e5e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    input[type="text"] {
+      flex: 1;
+      padding: 18px 24px;
+      border: 2px solid #e5e5e0;
+      border-radius: 16px;
+      background: #fafaf8;
+      color: #1a1a1a;
+      font-size: 16px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+    
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #7c8c6e;
+      background: #fff;
+    }
+    
+    input[type="text"]::placeholder {
+      color: #999;
+    }
+    
+    select {
+      padding: 18px 24px;
+      border: 2px solid #e5e5e0;
+      border-radius: 16px;
+      background: #fafaf8;
+      color: #1a1a1a;
+      font-size: 16px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #7c8c6e;
+    }
+    
+    select option {
+      background: #fff;
+      color: #1a1a1a;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 18px 36px;
+      border: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background: #1a1a1a;
+      color: #fff;
+    }
+    
+    .btn-primary:hover {
+      background: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    
+    .btn-secondary {
+      background: #f5f5f0;
+      color: #1a1a1a;
+      border: 2px solid #e5e5e0;
+    }
+    
+    .btn-secondary:hover {
+      background: #eee;
+      border-color: #d5d5d0;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 24px;
+    }
+    
+    .loader.active {
+      display: block;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e5e0;
+      border-top-color: #7c8c6e;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loader p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .video-info {
+      display: none;
+      margin-top: 24px;
+      padding: 24px;
+      background: #fafaf8;
+      border-radius: 16px;
+      border: 1px solid #e5e5e0;
+    }
+    
+    .video-info.active {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    .video-info img {
+      width: 160px;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+    
+    .video-info-content h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    
+    .video-info-content p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .status {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: none;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .status.active {
+      display: block;
+    }
+    
+    .status.success {
+      background: #e8f5e0;
+      color: #2d5a1e;
+      border: 1px solid #c5e0b8;
+    }
+    
+    .status.error {
+      background: #fef0f0;
+      color: #c44;
+      border: 1px solid #f5c6c6;
+    }
+    
+    .downloads-section h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+    
+    .files-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: #fafaf8;
+      border-radius: 16px;
+      border: 1px solid #e5e5e0;
+      transition: all 0.3s ease;
+    }
+    
+    .file-item:hover {
+      background: #f5f5f0;
+      border-color: #d5d5d0;
+    }
+    
+    .file-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .file-meta {
+      color: #888;
+      font-size: 13px;
+    }
+    
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      margin-left: 16px;
+    }
+    
+    .btn-sm {
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+    
+    .btn-download {
+      background: #7c8c6e;
+      color: #fff;
+    }
+    
+    .btn-download:hover {
+      background: #6a7a5e;
+    }
+    
+    .btn-delete {
+      background: transparent;
+      color: #999;
+      border: 1px solid #e5e5e0;
+    }
+    
+    .btn-delete:hover {
+      background: #fef0f0;
+      color: #c44;
+      border-color: #f5c6c6;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+    
+    .empty-state p {
+      font-size: 15px;
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 16px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .card {
+        padding: 24px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+      }
+      
+      select {
+        width: 100%;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+      
+      .video-info.active {
+        flex-direction: column;
+      }
+      
+      .video-info img {
+        width: 100%;
+      }
+      
+      .file-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .file-actions {
+        margin-left: 0;
+        margin-top: 12px;
+        width: 100%;
+      }
+      
+      .btn-sm {
+        flex: 1;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Video<span>Downloader</span></h1>
+      <p class="subtitle">Download videos from YouTube up to 4K quality</p>
+    </header>
+
+    <div class="platforms">
+      <span class="platform">▶ YouTube</span>
+    </div>
+    
+    <div class="card">
+      <div class="input-group">
+        <input type="text" id="url" placeholder="Paste YouTube video URL...">
+        <select id="quality">
+          <option value="4k">4K</option>
+          <option value="2k">2K</option>
+          <option value="1080">1080p</option>
+          <option value="720" selected>720p</option>
+          <option value="480">480p</option>
+          <option value="360">360p</option>
+          <option value="240">240p</option>
+          <option value="audio">MP3</option>
+        </select>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="downloadBtn" onclick="downloadVideo()">
+          Save to Server
+        </button>
+        <button class="btn btn-secondary" id="streamBtn" onclick="streamDownload()">
+          Direct Download
+        </button>
+        <button class="btn btn-secondary" onclick="getInfo()">
+          Preview
+        </button>
+      </div>
+      
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p id="loaderText">Processing...</p>
+      </div>
+      
+      <div class="video-info" id="videoInfo">
+        <img id="thumbnail" src="" alt="Thumbnail">
+        <div class="video-info-content">
+          <h3 id="videoTitle"></h3>
+          <p id="videoMeta"></p>
+        </div>
+      </div>
+      
+      <div class="status" id="status"></div>
+    </div>
+    
+    <div class="card downloads-section">
+      <h2>Downloads</h2>
+      <div class="files-list" id="filesList">
+        <div class="empty-state">
+          <p>No downloads yet. Paste a URL above to get started!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    
+    loadFiles();
+    
+    async function getInfo() {
+      const url = document.getElementById('url').value.trim();
+      if (!url) {
+        showStatus('Please enter a URL', 'error');
+        return;
+      }
+      
+      showLoader('Fetching video info...');
+      hideStatus();
+      document.getElementById('videoInfo').classList.remove('active');
+      
+      try {
+        const res = await fetch(`${API}/info`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          document.getElementById('thumbnail').src = data.thumbnail || '';
+          document.getElementById('videoTitle').textContent = data.title || 'Unknown';
+          document.getElementById('videoMeta').textContent = 
+            `Duration: ${formatDuration(data.duration)}  ·  Uploader: ${data.uploader || 'Unknown'}`;
+          document.getElementById('videoInfo').classList.add('active');
+        } else {
+          showStatus(data.error, 'error');
+        }
+      } catch (err) {
+        showStatus('Failed to get video info', 'error');
+      }
+      
+      hideLoader();
+    }
+    
+    async function downloadVideo() {
+      const url = document.getElementById('url').value.trim();
+      const quality = document.getElementById('quality').value;
+      
+      if (!url) {
+        showStatus('Please enter a URL', 'error');
+        return;
+      }
+      
+      showLoader('Downloading to server... This may take a few minutes.');
+      hideStatus();
+      document.getElementById('downloadBtn').disabled = true;
+      
+      try {
+        const res = await fetch(`${API}/download`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, quality })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          showStatus('Download complete! Click Download button below to save to your device.', 'success');
+          loadFiles();
+        } else {
+          showStatus(data.error, 'error');
+        }
+      } catch (err) {
+        showStatus('Download failed. Please try again.', 'error');
+      }
+      
+      hideLoader();
+      document.getElementById('downloadBtn').disabled = false;
+    }
+    
+    async function streamDownload() {
+      const url = document.getElementById('url').value.trim();
+      const quality = document.getElementById('quality').value;
+      
+      if (!url) {
+        showStatus('Please enter a URL', 'error');
+        return;
+      }
+      
+      showLoader('Starting direct download... File will save to your device automatically.');
+      hideStatus();
+      document.getElementById('streamBtn').disabled = true;
+      
+      try {
+        const res = await fetch(`${API}/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, quality })
+        });
+        
+        if (!res.ok) {
+          const data = await res.json();
+          showStatus(data.error || 'Download failed', 'error');
+          hideLoader();
+          document.getElementById('streamBtn').disabled = false;
+          return;
+        }
+        
+        // Get filename from header
+        const contentDisp = res.headers.get('Content-Disposition');
+        let filename = 'video.mp4';
+        if (contentDisp) {
+          const match = contentDisp.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^'";\s]+)/i);
+          if (match) filename = decodeURIComponent(match[1]);
+        }
+        
+        // Download file
+        const blob = await res.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+        
+        showStatus('Download complete! Check your downloads folder.', 'success');
+      } catch (err) {
+        showStatus('Download failed. Please try again.', 'error');
+      }
+      
+      hideLoader();
+      document.getElementById('streamBtn').disabled = false;
+    }
+    
+    async function loadFiles() {
+      try {
+        const res = await fetch(`${API}/files`);
+        const data = await res.json();
+        
+        const container = document.getElementById('filesList');
+        
+        if (data.files.length === 0) {
+          container.innerHTML = '<div class="empty-state"><p>No downloads yet. Paste a URL above to get started!</p></div>';
+          return;
+        }
+        
+        container.innerHTML = data.files.map(file => `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-name">${file.name}</div>
+              <div class="file-meta">${file.size}  ·  ${new Date(file.date).toLocaleDateString()}</div>
+            </div>
+            <div class="file-actions">
+              <a href="${file.path}" class="btn btn-sm btn-download" download>Download</a>
+              <button class="btn btn-sm btn-delete" onclick="deleteFile('${encodeURIComponent(file.name)}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load files:', err);
+      }
+    }
+    
+    async function deleteFile(filename) {
+      if (!confirm('Delete this file?')) return;
+      
+      try {
+        await fetch(`${API}/files/${filename}`, { method: 'DELETE' });
+        loadFiles();
+      } catch (err) {
+        alert('Failed to delete file');
+      }
+    }
+    
+    function showLoader(text) {
+      document.getElementById('loaderText').textContent = text;
+      document.getElementById('loader').classList.add('active');
+    }
+    
+    function hideLoader() {
+      document.getElementById('loader').classList.remove('active');
+    }
+    
+    function showStatus(message, type) {
+      const el = document.getElementById('status');
+      el.textContent = message;
+      el.className = 'status active ' + type;
+    }
+    
+    function hideStatus() {
+      document.getElementById('status').classList.remove('active');
+    }
+    
+    function formatDuration(seconds) {
+      if (!seconds) return 'Unknown';
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    document.getElementById('url').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') downloadVideo();
+    });
+  </script>
+</body>
+</html>
