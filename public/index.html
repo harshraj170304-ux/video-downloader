@@ -439,11 +439,8 @@
         </select>
       </div>
       <div class="btn-group">
-        <button class="btn btn-primary" id="downloadBtn" onclick="downloadVideo()">
-          Save to Server
-        </button>
-        <button class="btn btn-secondary" id="streamBtn" onclick="streamDownload()">
-          Direct Download
+        <button class="btn btn-primary" id="streamBtn" onclick="streamDownload()">
+          Download
         </button>
         <button class="btn btn-secondary" onclick="getInfo()">
           Preview
@@ -465,21 +462,10 @@
       
       <div class="status" id="status"></div>
     </div>
-    
-    <div class="card downloads-section">
-      <h2>Downloads</h2>
-      <div class="files-list" id="filesList">
-        <div class="empty-state">
-          <p>No downloads yet. Paste a URL above to get started!</p>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>
     const API = '/api';
-    
-    loadFiles();
     
     async function getInfo() {
       const url = document.getElementById('url').value.trim();
@@ -517,42 +503,6 @@
       hideLoader();
     }
     
-    async function downloadVideo() {
-      const url = document.getElementById('url').value.trim();
-      const quality = document.getElementById('quality').value;
-      
-      if (!url) {
-        showStatus('Please enter a URL', 'error');
-        return;
-      }
-      
-      showLoader('Downloading to server... This may take a few minutes.');
-      hideStatus();
-      document.getElementById('downloadBtn').disabled = true;
-      
-      try {
-        const res = await fetch(`${API}/download`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, quality })
-        });
-        
-        const data = await res.json();
-        
-        if (res.ok) {
-          showStatus('Download complete! Click Download button below to save to your device.', 'success');
-          loadFiles();
-        } else {
-          showStatus(data.error, 'error');
-        }
-      } catch (err) {
-        showStatus('Download failed. Please try again.', 'error');
-      }
-      
-      hideLoader();
-      document.getElementById('downloadBtn').disabled = false;
-    }
-    
     async function streamDownload() {
       const url = document.getElementById('url').value.trim();
       const quality = document.getElementById('quality').value;
@@ -562,7 +512,7 @@
         return;
       }
       
-      showLoader('Starting direct download... File will save to your device automatically.');
+      showLoader('Starting download... File will save to your device automatically.');
       hideStatus();
       document.getElementById('streamBtn').disabled = true;
       
@@ -609,46 +559,6 @@
       document.getElementById('streamBtn').disabled = false;
     }
     
-    async function loadFiles() {
-      try {
-        const res = await fetch(`${API}/files`);
-        const data = await res.json();
-        
-        const container = document.getElementById('filesList');
-        
-        if (data.files.length === 0) {
-          container.innerHTML = '<div class="empty-state"><p>No downloads yet. Paste a URL above to get started!</p></div>';
-          return;
-        }
-        
-        container.innerHTML = data.files.map(file => `
-          <div class="file-item">
-            <div class="file-info">
-              <div class="file-name">${file.name}</div>
-              <div class="file-meta">${file.size}  ·  ${new Date(file.date).toLocaleDateString()}</div>
-            </div>
-            <div class="file-actions">
-              <a href="${file.path}" class="btn btn-sm btn-download" download>Download</a>
-              <button class="btn btn-sm btn-delete" onclick="deleteFile('${encodeURIComponent(file.name)}')">Delete</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error('Failed to load files:', err);
-      }
-    }
-    
-    async function deleteFile(filename) {
-      if (!confirm('Delete this file?')) return;
-      
-      try {
-        await fetch(`${API}/files/${filename}`, { method: 'DELETE' });
-        loadFiles();
-      } catch (err) {
-        alert('Failed to delete file');
-      }
-    }
-    
     function showLoader(text) {
       document.getElementById('loaderText').textContent = text;
       document.getElementById('loader').classList.add('active');
@@ -676,7 +586,7 @@
     }
     
     document.getElementById('url').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') downloadVideo();
+      if (e.key === 'Enter') streamDownload();
     });
   </script>
 </body>
